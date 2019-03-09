@@ -1,0 +1,31 @@
+---
+- hosts: 127.0.0.1
+  connection: local
+  vars:
+    bert:
+      ip: 0.0.0.0
+      port: 77
+  tasks:
+    - name: "Check status of output"
+      stat: 
+        path: ./output
+      register: output_data
+
+    - debug:
+        msg: "output_data: {{output_data}}"        
+
+    - name: "Cleaning output"
+      file: 
+        path: ./output
+        state: absent
+      when: output_data.stat.exists
+
+    - name: "Creating output"
+      file: 
+        path: ./output
+        state: directory
+
+    - name: "Save files"
+      copy:
+        content: "{{bert|to_json }}"
+        dest: "/home/denis/PycharmProjects/AnsibleTest/output/bert_config.json"

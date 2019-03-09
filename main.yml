@@ -1,0 +1,34 @@
+---
+- hosts: 127.0.0.1
+  connection: local
+  tasks:
+    - name: "Check status of output"
+      stat: 
+        path: ./output
+      register: output_data
+
+    - debug:
+        msg: "output_data: {{output_data}}"        
+
+    - name: "Cleaning output"
+      file: 
+        path: ./output
+        state: absent
+      when: output_data.stat.exists
+
+    - name: "Creating output"
+      file: 
+        path: ./output
+        state: directory
+
+    - name: "Loading variables"
+      include_vars:
+        file: env/dev/bert_config.yml
+
+    - name: "Save files"
+      copy:
+        content: "{{lookup('template', './templates/bert_config.json')|to_json }}"
+        dest: "/home/denis/PycharmProjects/AnsibleTest/output/bert_config.json"
+    
+    - debug:
+        msg: "Content: {{ lookup('template', './templates/bert_config.json') }}"
